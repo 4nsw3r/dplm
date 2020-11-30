@@ -31,7 +31,7 @@ class OrderFilter(filters.FilterSet):
     )
 
     created_at = filters.DateFromToRangeFilter()
-    update_at = filters.DateFromToRangeFilter()
+    updated_at = filters.DateFromToRangeFilter()
 
     status = filters.ChoiceFilter(choices=Orders.STATUSES)
 
@@ -43,4 +43,31 @@ class OrderFilter(filters.FilterSet):
 
     class Meta:
         model = Orders
-        fields = ('id', 'status', 'created_at', 'update_at', 'products')
+        fields = ('id', 'status', 'created_at', 'updated_at', 'products')
+
+
+class ReviewFilter(filters.FilterSet):
+    """Фильтры для отзывов."""
+
+    id = filters.ModelMultipleChoiceFilter(
+        field_name='id',
+        to_field_name='id',
+        queryset=ProductReviews.objects.all()
+    )
+
+    created_at = filters.DateFromToRangeFilter()
+
+    review = filters.ModelMultipleChoiceFilter(
+        field_name='review__id',
+        to_field_name='id',
+        queryset=Product.objects.all()
+    )
+    # creator = filters.ModelMultipleChoiceFilter(
+    #     field_name='creator',
+    #     to_field_name='creator__id',
+    #     queryset=ProductReviews.objects.all()
+    # )
+
+    class Meta:
+        model = ProductReviews
+        fields = ('id', 'review', 'creator', 'created_at')

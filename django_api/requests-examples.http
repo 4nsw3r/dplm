@@ -1,67 +1,116 @@
 # примеры API-запросов
 
-# получение объявлений
-GET 127.0.0.1:8000/api/v1/orders/?products=Tea
+# получение заказов
+GET 127.0.0.1:8000/api/v1/orders/
 Content-Type: application/json
-Authorization: Token a41edf735ef52515ceb35a0f3021ae3011743461
+Authorization: Token 29e07421a0aa6d49dc35a6c5c05aa2b3891d2079
 
 ###
-# создание объявления
+#фильтрация заказов по статусу и наименованию товаров
+GET 127.0.0.1:8000/api/v1/orders/?status=Done&products=Tea
+Content-Type: application/json
+Authorization: Token 29e07421a0aa6d49dc35a6c5c05aa2b3891d2079
+
+###
+# создание заказа
 POST 127.0.0.1:8000/api/v1/orders/
 Content-Type: application/json
-Authorization: Token 5d0a3e97adb8d302f9366c9dd962c774bfbfd944
+Authorization: Token 29e07421a0aa6d49dc35a6c5c05aa2b3891d2079
 
 {
   "positions": [
-    {"product_id": 4, "quantity": 1}
+    {"product_id": 6, "quantity": 2},
+    {"product_id": 7, "quantity": 2},
+    {"product_id": 8, "quantity": 2},
+    {"product_id": 9, "quantity": 4}
   ]
 }
 
 ###
-
-GET 127.0.0.1:8000/api/v1/products/
+#удаление товара с ИД=5
+DELETE 127.0.0.1:8000/api/v1/products/6/
 Content-Type: application/json
-Authorization: Token a41edf735ef52515ceb35a0f3021ae3011743461
+Authorization: Token 29e07421a0aa6d49dc35a6c5c05aa2b3891d2079
 
 ###
+#получение всех товаров
+GET 127.0.0.1:8000/api/v1/products/
+Content-Type: application/json
+#Authorization: Token 29e07421a0aa6d49dc35a6c5c05aa2b3891d2079
 
+###
+#фильтрация товаров по цене и названию
+GET 127.0.0.1:8000/api/v1/products/?price_from=100&name=limon
+Content-Type: application/json
+#Authorization: Token 29e07421a0aa6d49dc35a6c5c05aa2b3891d2079
+
+###
+#создание товара
+POST 127.0.0.1:8000/api/v1/products/
+Content-Type: application/json
+Authorization: Token 29e07421a0aa6d49dc35a6c5c05aa2b3891d2079
+
+{
+  "name": "limon",
+  "desc": "desc for limon",
+  "price": 200
+}
+
+###
+#создание отзыва
 POST 127.0.0.1:8000/api/v1/reviews/
 Content-Type: application/json
 Authorization: Token 5d0a3e97adb8d302f9366c9dd962c774bfbfd944
 
 {
-  "review": 4,
-  "text": "review for cofe",
-  "mark": 6
+  "review": 10,
+  "text": "review for limon",
+  "mark": 2
 }
 
 ###
-
+#получение всех отзывов
 GET 127.0.0.1:8000/api/v1/reviews/
 Content-Type: application/json
-Authorization: Token a41edf735ef52515ceb35a0f3021ae3011743461
+Authorization: Token 29e07421a0aa6d49dc35a6c5c05aa2b3891d2079
+
+###
+#фильтрация отзывов !!!!!!!
+GET 127.0.0.1:8000/api/v1/reviews/?review=7
+Content-Type: application/json
+Authorization: Token 29e07421a0aa6d49dc35a6c5c05aa2b3891d2079
 
 ###
 
-# попытка поменять объявление
-PATCH 127.0.0.1:8000/api/advertisements/25/
+#обновление отзыва
+PATCH 127.0.0.1:8000/api/v1/reviews/52/
 Content-Type: application/json
-Authorization: Token 90c3941909c5d6cceade814470f74efbfc65d6f8
+Authorization: Token 29e07421a0aa6d49dc35a6c5c05aa2b3891d2079
 
 {
-  "status": "DRAFT"
+  "mark": 3
 }
 
 ###
-
-# фильтрация по создателю
-GET 127.0.0.1:8000/api/advertisements/?status=OPEN
+#получение всех подборок
+GET 127.0.0.1:8000/api/v1/collections/
 Content-Type: application/json
+#Authorization: Token 29e07421a0aa6d49dc35a6c5c05aa2b3891d2079
 
 ###
-
-# фильтрация по дате
-GET 127.0.0.1:8000/api/advertisements/?created_at_before=2019-10-01
+#создание подборки
+POST 127.0.0.1:8000/api/v1/collections/
 Content-Type: application/json
+Authorization: Token 29e07421a0aa6d49dc35a6c5c05aa2b3891d2079
+
+{
+  "title": "collections_2",
+  "text": "colcolcol",
+  "products": [
+    6,
+    8,
+    7
+  ]
+}
 
 ###

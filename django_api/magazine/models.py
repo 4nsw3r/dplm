@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.db import models
-#from django.contrib.auth.models import User
 
 
 class TimestampFields(models.Model):
@@ -21,37 +20,35 @@ class Product(TimestampFields):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name_plural = 'Products'
+        verbose_name = 'Product'
+
 
 class ProductReviews(TimestampFields):
     """Отзыв к товару"""
-    review = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, related_name='reviews')
+    review = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, related_name='reviews', verbose_name="Товар")
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
+        verbose_name="Пользователь"
     )
 
-    text = models.TextField(max_length=1000)
-    mark = models.PositiveIntegerField()
+    text = models.TextField(max_length=1000, verbose_name="Отзыв")
+    mark = models.PositiveIntegerField(verbose_name="Оценка")
+
+    class Meta:
+        verbose_name_plural = 'Reviews'
+        verbose_name = 'Review'
 
 
 class ProductOrderPosition(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    order = models.ForeignKey("Orders", related_name='positions', on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(default=1)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="Товары")
+    order = models.ForeignKey("Orders", related_name='positions', on_delete=models.CASCADE, verbose_name="Заказ")
+    quantity = models.PositiveIntegerField(default=1, verbose_name="Количество")
 
-    # def save(self, *args, **kwargs):
-    #     prod = ProductOrderPosition.objects.all()
-    #     total = 0.00
-    #     total = math.fsum(item.quantity * item.product.price for item in prod)
-    #     self.order.order_sum = total
-    #     super(ProductOrderPosition, self).save(*args, **kwargs)
-    
-    # def save(self, *args, **kwargs):
-    #     price = self.product.price
-    #     items = self.quantity
-    #     total = price * items
-    #     self.order.order_sum = total
-    #     super(ProductOrderPosition, self).save(*args, **kwargs)
+    def get_cost(self):
+        return self.product.price * self.quantity
 
 
 class Orders(TimestampFields):
@@ -66,16 +63,31 @@ class Orders(TimestampFields):
         settings.AUTH_USER_MODEL,
         null=True,
         on_delete=models.CASCADE,
+        verbose_name="Пользователь"
     )
-    status = models.CharField(max_length=12, choices=STATUSES, default="New")
-    order_sum = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    products = models.ManyToManyField(Product, through=ProductOrderPosition)
+    status = models.CharField(max_length=12, choices=STATUSES, default="New", verbose_name="Статус")
+    products = models.ManyToManyField(Product, through=ProductOrderPosition, verbose_name="Товары")
 
-        
-        
-# class Collections(TimestampFields):
-#     """Коллекции"""
-#
-#     title = models.CharField(max_length=100)
-#     text = models.TextField(max_length=1000)
-#     products = models.ForeignKey
+    def get_total_cost(self):
+        return sum(item.get_cost() for item in self.positions.all())
+
+    order_sum = property(get_total_cost)
+
+    class Meta:
+        verbose_name_plural = 'Orders'
+        verbose_name = 'Order'
+        ordering = ['-created_at']
+
+class Collections(TimestampFields):
+    """Коллекции"""
+
+    title = models.CharField(max_length=100, verbose_name="Заголовок")
+    text = models.TextField(max_length=1000, verbose_name="Описание")
+    products = models.ManyToManyField(Product, verbose_name="Товары")
+
+    class Meta:
+        verbose_name_plural = 'Collections'
+        verbose_name = 'Collection'
+
+    def __str__(self):
+        return self.title
