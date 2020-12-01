@@ -1,5 +1,7 @@
 import pytest
 from rest_framework.test import APIClient
+from django.contrib.auth.models import User
+from rest_framework.authtoken.models import Token
 
 
 @pytest.fixture
@@ -8,3 +10,27 @@ def api_client():
     return APIClient()
 
 
+@pytest.fixture
+def token_admin(admin_user):
+    from rest_framework.authtoken.models import Token
+    token, _ = Token.objects.get_or_create(user=admin_user)
+    return token.key
+
+
+@pytest.fixture
+def api_admin(token_admin):
+    client = APIClient()
+    client.credentials(HTTP_AUTHORIZATION=f'Token {token_admin}')
+    return client
+
+
+@pytest.fixture
+def api_user(django_user_model):
+    client = APIClient()
+    username = 'user1'
+    password = '123'
+    user = django_user_model.objects.create_user(username=username, password=password, is_staff=False)
+    user_token = Token.objects.create(user=user)
+    client.force_login(user)
+    client.credentials(HTTP_AUTHORIZATION=f'Token {user_token.key}')
+    return client

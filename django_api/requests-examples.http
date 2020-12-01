@@ -72,7 +72,7 @@ Authorization: Token 5d0a3e97adb8d302f9366c9dd962c774bfbfd944
 #получение всех отзывов
 GET 127.0.0.1:8000/api/v1/reviews/
 Content-Type: application/json
-Authorization: Token 29e07421a0aa6d49dc35a6c5c05aa2b3891d2079
+#Authorization: Token 29e07421a0aa6d49dc35a6c5c05aa2b3891d2079
 
 ###
 #фильтрация отзывов !!!!!!!

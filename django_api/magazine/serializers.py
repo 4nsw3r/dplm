@@ -13,7 +13,7 @@ class ProductOrderPositionSerializer(serializers.Serializer):
 
     name = serializers.CharField(source='product.name', read_only=True)
     quantity = serializers.IntegerField(min_value=1)
-    price = serializers.DecimalField(max_digits=10, decimal_places=2, source='product.price', read_only=True)
+    price = serializers.DecimalField(max_digits=10, decimal_places=2, source='product.price', read_only=True, min_value=1)
 
 class OrderSerializer(serializers.ModelSerializer):
 

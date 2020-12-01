@@ -70,8 +70,8 @@ class ReviewsViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset = ReviewFilter
 
-    permission_classes_by_action = {'list': [IsAuthenticated],
-                                    'retrieve': [IsAuthenticated],
+    permission_classes_by_action = {'list': [AllowAny],
+                                    'retrieve': [AllowAny],
                                     'create': [IsAuthenticated],
                                     'destroy': [isAllowed],
                                     'update': [isAllowed],
