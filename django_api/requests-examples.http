@@ -75,7 +75,7 @@ Content-Type: application/json
 #Authorization: Token 29e07421a0aa6d49dc35a6c5c05aa2b3891d2079
 
 ###
-#фильтрация отзывов !!!!!!!
+#фильтрация отзывов
 GET 127.0.0.1:8000/api/v1/reviews/?creator=3
 Content-Type: application/json
 Authorization: Token 29e07421a0aa6d49dc35a6c5c05aa2b3891d2079

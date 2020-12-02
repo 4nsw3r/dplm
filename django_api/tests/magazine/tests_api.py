@@ -147,7 +147,6 @@ def test_review_get(api_client, review_factory):
     url = reverse("reviews-detail", args=(review.id,))
     resp = api_client.get(url)
     assert resp.status_code == HTTP_200_OK
-
     resp_json = resp.json()
     assert resp_json['id'] == review.id
 
@@ -184,35 +183,159 @@ def test_review_post_no_auth(api_client):
     assert resp.status_code == HTTP_401_UNAUTHORIZED
 
 
-# тест на обновление своего отзыва
-# тест на создание двух отзывов к 1 товару
+# тест на обновление своего отзыва!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+# тест на создание двух отзывов к 1 товару!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+# тест на получение списка заказов без авторизации
 @pytest.mark.django_db
-def test_order_create_auth(api_user, api_admin, review_factory, product_factory):
-    product = product_factory()
-    review = review_factory()
-    url = reverse('reviews-list')
-    rev_data = {
-        'review': review.review['id'],
-        'text': 'test',
-        'mark': 2
-    }
-    resp = api_admin.post(url, rev_data)
-    assert resp.status_code == HTTP_201_CREATED
+def test_order_list_no_auth(api_client):
+
+    url = reverse('orders-list')
+    resp = api_client.get(url)
+    assert resp.status_code == HTTP_401_UNAUTHORIZED
 
 
+# тест на получение списка заказов с авторизацией
+@pytest.mark.django_db
+def test_order_list_auth(api_user):
+
+    url = reverse('orders-list')
+    resp = api_user.get(url)
+    assert resp.status_code == HTTP_200_OK
+
+
+# тест на получение своего заказа!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 # тест на создание заказа с авторизацией
-# @pytest.mark.django_db
-# def test_order_create_auth(api_user, order_factory, product_factory):
-#     product = product_factory()
-#     order_payload = {
-#         "positions": [
-#             {"product_id": product.id, "quantity": 2},
-#         ]
-#     }
-#     url = reverse('orders-list')
-#     resp = api_user.post(url, order_payload)
-#     assert resp.status_code == HTTP_201_CREATED
+@pytest.mark.django_db
+def test_order_create_auth(api_user, order_factory, product_factory):
+    product = product_factory()
+    order_payload = {
+        "id": 1,
+        "positions": [
+            {"product_id": product.id, "quantity": 2},
+        ]
+    }
+    url = reverse('orders-list')
+    resp = api_user.post(url, order_payload, format='json')
+    assert resp.status_code == HTTP_201_CREATED
+    resp_json = resp.json()
+    assert resp_json['id'] == order_payload['id']
+
+
+# тест на  создание заказа без авторизаяции
+@pytest.mark.django_db
+def test_order_create_no_auth(api_client, product_factory):
+    product = product_factory()
+    order_payload = {
+        "positions": [
+            {"product_id": product.id, "quantity": 2},
+        ]
+    }
+    url = reverse('orders-list')
+    resp = api_client.post(url, order_payload, format='json')
+    assert resp.status_code == HTTP_401_UNAUTHORIZED
+
+
+# тест на изменение заказа админом!!!!!!!!!!!!!!!!!!!!!!!!
+
+# тест на изменение заказа юзером!!!!!!!!!!!!!!!!!!!!!!!!!
+
+# тест на удаление заказа админом!!!!!!!!!!!!!!!!!!!!!!!!!
+
+# тест на удаление заказа юзером!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+# тест на получение всех подборок
+@pytest.mark.django_db
+def test_collection_list(api_client):
+
+    url = reverse('collections-list')
+    resp = api_client.get(url)
+    assert resp.status_code == HTTP_200_OK
+
+
+# тест на создание подборки админом
+@pytest.mark.django_db
+def test_collection_post_admin(api_admin, product_factory):
+    product = product_factory(_quantity=2)
+    collection_payload = {
+        'id': 1,
+        'title': 'test_collection',
+        'text': 'desc for collection',
+        'products': [
+            product[0].id,
+            product[1].id
+        ]
+    }
+    url = reverse('collections-list')
+    resp = api_admin.post(url, collection_payload, format='json')
+    assert resp.status_code == HTTP_201_CREATED
+    resp_json = resp.json()
+    assert resp_json['title'] == collection_payload['title']
+
+
+# тест на создание подборки юзером
+@pytest.mark.django_db
+def test_collection_post_user(api_user, product_factory):
+
+    product = product_factory(_quantity=3)
+    collection_payload = {
+        'id': 1,
+        'title': 'test_collection',
+        'text': 'desc for collection',
+        'products': [
+            product[0].id,
+            product[1].id
+        ]
+    }
+    url = reverse('collections-list')
+    resp = api_user.post(url, collection_payload, format='json')
+    assert resp.status_code == HTTP_403_FORBIDDEN
+
+
+# тест на изменение подборки админом
+@pytest.mark.django_db
+def test_collections_update_admin(api_admin, collection_factory):
+
+    collection = collection_factory()
+    params = {'title': 'Test_product'}
+    url = reverse('collections-detail', args=(collection.id,))
+    resp = api_admin.patch(url, params)
+    assert resp.status_code == HTTP_200_OK
+    resp_json = resp.json()
+    assert resp_json['title'] == params['title']
+
+
+# тест на изменение подборки юзером
+@pytest.mark.django_db
+def test_collections_update_user(api_user, collection_factory):
+
+    collection = collection_factory()
+    params = {'title': 'Test_product'}
+    url = reverse('collections-detail', args=(collection.id,))
+    resp = api_user.patch(url, params)
+    assert resp.status_code == HTTP_403_FORBIDDEN
+
+
+# тест на удаление подборки админом
+@pytest.mark.django_db
+def test_collections_delete_user(api_admin, collection_factory):
+
+    collection = collection_factory()
+    url = reverse('collections-detail', args=(collection.id,))
+    resp = api_admin.patch(url, {"id": collection.id})
+    assert resp.status_code == HTTP_204_NO_CONTENT
+
+
+# тест на удаление подборки юзером
+@pytest.mark.django_db
+def test_collections_delete_user(api_user, collection_factory):
+
+    collection = collection_factory()
+    url = reverse('collections-detail', args=(collection.id,))
+    resp = api_user.patch(url, {"id": collection.id})
+    assert resp.status_code == HTTP_403_FORBIDDEN
 
 
 
