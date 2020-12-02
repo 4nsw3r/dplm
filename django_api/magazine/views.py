@@ -68,7 +68,7 @@ class ReviewsViewSet(ModelViewSet):
     queryset = ProductReviews.objects.select_related('review').all()
     serializer_class = ReviewsSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset = ReviewFilter
+    filterset_class = ReviewFilter
 
     permission_classes_by_action = {'list': [AllowAny],
                                     'retrieve': [AllowAny],

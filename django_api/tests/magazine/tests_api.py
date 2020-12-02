@@ -155,9 +155,9 @@ def test_review_get(api_client, review_factory):
 # тест на создание отзыва с авторизацией
 @pytest.mark.django_db
 def test_review_post_auth(api_user, product_factory):
-    product = product_factory()
+    product = product_factory(_quantity=2)
     review_payload = {
-        'review': 1,
+        'review': product[0].id,
         'text': 'desc for test_product',
         'mark': 1,
     }
@@ -186,7 +186,33 @@ def test_review_post_no_auth(api_client):
 
 # тест на обновление своего отзыва
 # тест на создание двух отзывов к 1 товару
+@pytest.mark.django_db
+def test_order_create_auth(api_user, api_admin, review_factory, product_factory):
+    product = product_factory()
+    review = review_factory()
+    url = reverse('reviews-list')
+    rev_data = {
+        'review': review.review['id'],
+        'text': 'test',
+        'mark': 2
+    }
+    resp = api_admin.post(url, rev_data)
+    assert resp.status_code == HTTP_201_CREATED
 
+
+
+# тест на создание заказа с авторизацией
+# @pytest.mark.django_db
+# def test_order_create_auth(api_user, order_factory, product_factory):
+#     product = product_factory()
+#     order_payload = {
+#         "positions": [
+#             {"product_id": product.id, "quantity": 2},
+#         ]
+#     }
+#     url = reverse('orders-list')
+#     resp = api_user.post(url, order_payload)
+#     assert resp.status_code == HTTP_201_CREATED
 
 
 

@@ -31,7 +31,8 @@ class ProductReviews(TimestampFields):
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        verbose_name="Пользователь"
+        verbose_name="Пользователь",
+        related_name='users'
     )
 
     text = models.TextField(max_length=1000, verbose_name="Отзыв")

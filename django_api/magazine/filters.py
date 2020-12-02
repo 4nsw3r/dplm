@@ -1,5 +1,6 @@
+from django.contrib.auth import get_user_model
 from django_filters import rest_framework as filters
-
+from django.contrib.auth.models import User
 from .models import Product, Orders, ProductReviews
 
 
@@ -58,15 +59,15 @@ class ReviewFilter(filters.FilterSet):
     created_at = filters.DateFromToRangeFilter()
 
     review = filters.ModelMultipleChoiceFilter(
-        field_name='review__id',
+        field_name='id',
         to_field_name='id',
         queryset=Product.objects.all()
     )
-    # creator = filters.ModelMultipleChoiceFilter(
-    #     field_name='creator',
-    #     to_field_name='creator__id',
-    #     queryset=ProductReviews.objects.all()
-    # )
+    #???
+    creator = filters.ModelMultipleChoiceFilter(
+        to_field_name='id',
+        queryset=get_user_model().objects.all()
+    )
 
     class Meta:
         model = ProductReviews
