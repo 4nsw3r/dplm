@@ -3,3 +3,5 @@ djangorestframework~=3.12.1
 django-filter~=2.4.0
 pytest~=6.1.2
 model_bakery~=1.2.0
+psycopg2~=2.8.5
+pytest-cov~=2.10.1

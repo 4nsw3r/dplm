@@ -6,7 +6,7 @@ from rest_framework.status import HTTP_200_OK, HTTP_401_UNAUTHORIZED, \
 
 from magazine.models import Product, ProductReviews, Orders, Collections
 
-
+# ____________Tests for products____________
 # тест на получение всех товаров
 @pytest.mark.django_db
 def test_product_list(api_client):
@@ -16,19 +16,19 @@ def test_product_list(api_client):
 
 
 # # тест на создание товаров в базе данных
-# @pytest.mark.django_db
-# def test_product_create(api_client):
-#     product = Product.objects.bulk_create([
-#         Product(name='Test_product_1', price=1000),
-#         Product(name='Test_product_2', price=2000),
-#         ])
-#     url = reverse('products-list')
-#     resp = api_client.get(url)
-#
-#     assert resp.status_code == HTTP_200_OK
-#     resp_json = resp.json()
-#     assert len(resp_json) == 2
-#     assert resp_json[0]['name'] == product[0].name
+@pytest.mark.django_db
+def test_product_create(api_client):
+    product = Product.objects.bulk_create([
+        Product(name='Test_product_1', price=1000),
+        Product(name='Test_product_2', price=2000),
+        ])
+    url = reverse('products-list')
+    resp = api_client.get(url)
+
+    assert resp.status_code == HTTP_200_OK
+    resp_json = resp.json()
+    assert len(resp_json) == 2
+    assert resp_json[0]['name'] == product[0].name
 
 
 # тест на создание товара без авторизации
@@ -132,6 +132,7 @@ def test_product_get(api_client, product_factory):
     assert resp_json['id'] == product.id
 
 
+# ____________Tests for reviews____________
 # тест на получение всех отзывов
 @pytest.mark.django_db
 def test_review_list(client):
@@ -182,11 +183,28 @@ def test_review_post_no_auth(api_client):
     resp = api_client.post(url, review_payload)
     assert resp.status_code == HTTP_401_UNAUTHORIZED
 
+# тест на удаление отзыва своего/чужого
 
-# тест на обновление своего отзыва!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
 
 # тест на создание двух отзывов к 1 товару!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+@pytest.mark.django_db
+def test_review_double_post(api_user, review_factory, product_factory):
+    product = product_factory(_quantity=2)
+    review = review_factory(review=product[0].id)
+    url = reverse('reviews-list')
+    new_review = {
+        'review': review.review.id,
+        'text': 'test',
+        'mark': 1
+    }
+    resp = api_user.post(url, new_review)
+    assert resp.status_code == HTTP_201_CREATED
 
+
+# ____________Tests for orders____________
 # тест на получение списка заказов без авторизации
 @pytest.mark.django_db
 def test_order_list_no_auth(api_client):
@@ -238,7 +256,8 @@ def test_order_create_no_auth(api_client, product_factory):
     assert resp.status_code == HTTP_401_UNAUTHORIZED
 
 
-# тест на изменение заказа админом!!!!!!!!!!!!!!!!!!!!!!!!
+
+
 
 # тест на изменение заказа юзером!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -246,6 +265,8 @@ def test_order_create_no_auth(api_client, product_factory):
 
 # тест на удаление заказа юзером!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+
+# ____________Tests for collections____________
 # тест на получение всех подборок
 @pytest.mark.django_db
 def test_collection_list(api_client):
@@ -296,7 +317,7 @@ def test_collection_post_user(api_user, product_factory):
 
 # тест на изменение подборки админом
 @pytest.mark.django_db
-def test_collections_update_admin(api_admin, collection_factory):
+def test_collection_update_admin(api_admin, collection_factory):
 
     collection = collection_factory()
     params = {'title': 'Test_product'}
@@ -339,3 +360,35 @@ def test_collections_delete_user(api_user, collection_factory):
 
 
 
+
+
+
+###################################################################
+# тест на обновление своего/чужого отзыва!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+@pytest.mark.django_db
+def test_update_review(api_admin, review_factory):
+    review = review_factory()
+    params = {'text': 'Test_product'}
+    url = reverse('reviews-detail', args=(review.id,))
+    resp = api_admin.patch(url, params)
+    assert resp.status_code == HTTP_200_OK
+
+    
+# тест на изменение заказа админом!!!!!!!!!!!!!!!!!!!!!!!!
+@pytest.mark.django_db
+def test_order_update_admin(api_admin, order_factory, product_factory):
+    product = product_factory()
+    order_payload = {
+        "id": 1,
+        "positions": [
+            {"product_id": product.id, "quantity": 2},
+        ]
+    }
+    order = {
+        "positions": [
+            {"quantity": 3},
+        ]
+    }
+    url = reverse('orders-detail', args=(order_payload['id'],))
+    resp = api_admin.patch(url, order, format='json')
+    assert resp.status_code == HTTP_200_OK
