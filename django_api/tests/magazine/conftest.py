@@ -1,5 +1,6 @@
 import pytest
 from model_bakery import baker
+from tests.conftest import user, apiuser
 
 
 @pytest.fixture()
@@ -43,16 +44,11 @@ def collection_factory():
 #     return factory
 
 
-@pytest.fixture
-def user3(django_user_model):
-    username = 'user2'
-    password = '123'
-    user = django_user_model.objects.create_user(username=username, password=password, is_staff=False)
-    return user
+
 
 
 @pytest.fixture
-def order_prod_factory(user3):
+def order_prod_factory(user):
     def factory(**kwargs):
-        return baker.make('magazine.Orders', **kwargs, make_m2m=True)
+        return baker.make('magazine.Orders', creator=user, **kwargs, make_m2m=True)
     return factory

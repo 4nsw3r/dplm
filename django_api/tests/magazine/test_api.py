@@ -212,7 +212,6 @@ def test_update_review_my(apiuser, user, review_factory):
     assert resp.status_code == HTTP_200_OK
 
 
-<<<<<<< HEAD
 # тест на обновление чужого отзыва
 @pytest.mark.django_db
 def test_update_review_other(api_user, user, review_factory):
@@ -237,10 +236,6 @@ def test_review_double_post(apiuser, user, review_factory, product_factory):
     }
     resp_2 = apiuser.post(url, new_review)
     assert resp_2.status_code == HTTP_400_BAD_REQUEST
-=======
-
->>>>>>> 9912a8e500bde63fbb4d996fa3478ae5f8689c1e
-
 
 # ____________Tests for orders____________
 # тест на получение списка заказов без авторизации
@@ -425,33 +420,13 @@ def test_order_update_admin(api_admin, order_factory, product_factory, order_pro
     # position = {
     #     "products": product.id
     # }
-    order_payload = order_prod_factory()
-    order = {
-        "status": "Done"
+    order = order_prod_factory()
+    first_position = order.positions.first()
+    product_id = first_position.product.id
+    order_update_payload = {
+        'status': 'Done'
     }
-<<<<<<< HEAD
-    url = reverse('orders-detail', args=(order_payload.id, ))
-    resp = api_admin.patch(url, order)
-    assert resp.status_code == HTTP_200_OK
 
-
-=======
-    url = reverse('orders-detail', args=(order_payload['id'],))
-    resp = api_admin.patch(url, order, format='json')
+    url = reverse('orders-detail', args=(order.id, ))
+    resp = api_admin.patch(url, order_update_payload, format='json')
     assert resp.status_code == HTTP_200_OK
-    
-    
- # тест на создание двух отзывов к 1 товару!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-@pytest.mark.django_db
-def test_review_double_post(api_user, review_factory, product_factory):
-    product = product_factory(_quantity=2)
-    review = review_factory(review=product[0].id)
-    url = reverse('reviews-list')
-    new_review = {
-        'review': review.review.id,
-        'text': 'test',
-        'mark': 1
-    }
-    resp = api_user.post(url, new_review)
-    assert resp.status_code == HTTP_201_CREATED
->>>>>>> 9912a8e500bde63fbb4d996fa3478ae5f8689c1e

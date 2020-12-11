@@ -50,10 +50,3 @@ def apiuser(django_user_model, user):
     client.force_login(user)
     client.credentials(HTTP_AUTHORIZATION=f'Token {usertoken.key}')
     return client
-
-
-@pytest.fixture
-def order_prod_factory(user):
-    def factory(min_amount=1, max_amount=20, **kwargs):
-        return baker.make('Order', user=user, **kwargs, make_m2m=True)
-    return factory
