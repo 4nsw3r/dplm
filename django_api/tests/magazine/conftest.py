@@ -32,3 +32,27 @@ def collection_factory():
         collection = baker.make("magazine.Collections", **kwargs)
         return collection
     return factory
+
+
+# @pytest.fixture()
+# def order_prod_factory():
+#     def factory(**kwargs):
+#         #prod_set = baker.prepare("magazine.Product")
+#         orders_set = baker.make("magazine.Orders", products__id=1, products__created_at='2020-12-07', products__name='milk')
+#         return orders_set
+#     return factory
+
+
+@pytest.fixture
+def user3(django_user_model):
+    username = 'user2'
+    password = '123'
+    user = django_user_model.objects.create_user(username=username, password=password, is_staff=False)
+    return user
+
+
+@pytest.fixture
+def order_prod_factory(user3):
+    def factory(**kwargs):
+        return baker.make('magazine.Orders', **kwargs, make_m2m=True)
+    return factory

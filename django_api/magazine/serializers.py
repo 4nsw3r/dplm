@@ -18,7 +18,6 @@ class ProductOrderPositionSerializer(serializers.Serializer):
 class OrderSerializer(serializers.ModelSerializer):
 
     positions = ProductOrderPositionSerializer(many=True)
-    #order_sum = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
     creator = serializers.CharField(source='creator.username', read_only=True)
 
 

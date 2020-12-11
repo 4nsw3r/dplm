@@ -2,7 +2,7 @@ import pytest
 
 from django.urls import reverse
 from rest_framework.status import HTTP_200_OK, HTTP_401_UNAUTHORIZED, \
-    HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN, HTTP_201_CREATED
+    HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 
 from magazine.models import Product, ProductReviews, Orders, Collections
 
@@ -183,25 +183,59 @@ def test_review_post_no_auth(api_client):
     resp = api_client.post(url, review_payload)
     assert resp.status_code == HTTP_401_UNAUTHORIZED
 
-# тест на удаление отзыва своего/чужого
 
-
-
-
-
-# тест на создание двух отзывов к 1 товару!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# тест на удаление отзыва своего
 @pytest.mark.django_db
-def test_review_double_post(api_user, review_factory, product_factory):
+def test_review_delete_my(apiuser, user, review_factory):
+    review = review_factory(creator=user)
+    url = reverse("reviews-detail", args=(review.id, ))
+    resp = apiuser.delete(url, {"id": review.id})
+    assert resp.status_code == HTTP_204_NO_CONTENT
+
+
+# тест на удаление не своего отзыва
+@pytest.mark.django_db
+def test_review_delete_other(api_user, user, review_factory):
+    review = review_factory(creator=user)
+    url = reverse("reviews-detail", args=(review.id, ))
+    resp = api_user.delete(url, {"id": review.id})
+    assert resp.status_code == HTTP_403_FORBIDDEN
+
+
+# тест на обновление своего отзыва
+@pytest.mark.django_db
+def test_update_review_my(apiuser, user, review_factory):
+    review = review_factory(creator=user)
+    params = {'text': 'Test_product'}
+    url = reverse('reviews-detail', args=(review.id,))
+    resp = apiuser.patch(url, params)
+    assert resp.status_code == HTTP_200_OK
+
+
+# тест на обновление чужого отзыва
+@pytest.mark.django_db
+def test_update_review_other(api_user, user, review_factory):
+    review = review_factory(creator=user)
+    params = {'text': 'Test_product'}
+    url = reverse('reviews-detail', args=(review.id,))
+    resp = api_user.patch(url, params)
+    assert resp.status_code == HTTP_403_FORBIDDEN
+
+
+# тест на создание двух отзывов к 1 товару
+@pytest.mark.django_db
+def test_review_double_post(apiuser, user, review_factory, product_factory):
+
     product = product_factory(_quantity=2)
-    review = review_factory(review=product[0].id)
+    review = review_factory(creator=user, review=product[0])
     url = reverse('reviews-list')
     new_review = {
         'review': review.review.id,
         'text': 'test',
         'mark': 1
     }
-    resp = api_user.post(url, new_review)
-    assert resp.status_code == HTTP_201_CREATED
+    resp_2 = apiuser.post(url, new_review)
+    assert resp_2.status_code == HTTP_400_BAD_REQUEST
 
 
 # ____________Tests for orders____________
@@ -223,8 +257,6 @@ def test_order_list_auth(api_user):
     assert resp.status_code == HTTP_200_OK
 
 
-# тест на получение своего заказа!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 # тест на создание заказа с авторизацией
 @pytest.mark.django_db
 def test_order_create_auth(api_user, order_factory, product_factory):
@@ -242,7 +274,7 @@ def test_order_create_auth(api_user, order_factory, product_factory):
     assert resp_json['id'] == order_payload['id']
 
 
-# тест на  создание заказа без авторизаяции
+# тест на  создание заказа без авторизации
 @pytest.mark.django_db
 def test_order_create_no_auth(api_client, product_factory):
     product = product_factory()
@@ -261,9 +293,23 @@ def test_order_create_no_auth(api_client, product_factory):
 
 # тест на изменение заказа юзером!!!!!!!!!!!!!!!!!!!!!!!!!
 
-# тест на удаление заказа админом!!!!!!!!!!!!!!!!!!!!!!!!!
 
-# тест на удаление заказа юзером!!!!!!!!!!!!!!!!!!!!!!!!!!
+# тест на удаление заказа админом
+@pytest.mark.django_db
+def test_order_delete_admin(api_admin, order_factory):
+    order = order_factory()
+    url = reverse("orders-detail", args=(order.id, ))
+    resp = api_admin.delete(url, {"id": order.id})
+    assert resp.status_code == HTTP_204_NO_CONTENT
+
+
+# тест на удаление заказа юзером
+@pytest.mark.django_db
+def test_order_delete_user(api_user, order_factory):
+    order = order_factory()
+    url = reverse("orders-detail", args=(order.id, ))
+    resp = api_user.delete(url, {"id": order.id})
+    assert resp.status_code == HTTP_403_FORBIDDEN
 
 
 # ____________Tests for collections____________
@@ -345,7 +391,7 @@ def test_collections_delete_user(api_admin, collection_factory):
 
     collection = collection_factory()
     url = reverse('collections-detail', args=(collection.id,))
-    resp = api_admin.patch(url, {"id": collection.id})
+    resp = api_admin.delete(url, {"id": collection.id})
     assert resp.status_code == HTTP_204_NO_CONTENT
 
 
@@ -355,7 +401,7 @@ def test_collections_delete_user(api_user, collection_factory):
 
     collection = collection_factory()
     url = reverse('collections-detail', args=(collection.id,))
-    resp = api_user.patch(url, {"id": collection.id})
+    resp = api_user.delete(url, {"id": collection.id})
     assert resp.status_code == HTTP_403_FORBIDDEN
 
 
@@ -364,31 +410,23 @@ def test_collections_delete_user(api_user, collection_factory):
 
 
 ###################################################################
-# тест на обновление своего/чужого отзыва!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-@pytest.mark.django_db
-def test_update_review(api_admin, review_factory):
-    review = review_factory()
-    params = {'text': 'Test_product'}
-    url = reverse('reviews-detail', args=(review.id,))
-    resp = api_admin.patch(url, params)
-    assert resp.status_code == HTTP_200_OK
+
+
 
     
 # тест на изменение заказа админом!!!!!!!!!!!!!!!!!!!!!!!!
 @pytest.mark.django_db
-def test_order_update_admin(api_admin, order_factory, product_factory):
-    product = product_factory()
-    order_payload = {
-        "id": 1,
-        "positions": [
-            {"product_id": product.id, "quantity": 2},
-        ]
-    }
+def test_order_update_admin(api_admin, order_factory, product_factory, order_prod_factory):
+    # product = product_factory()
+    # position = {
+    #     "products": product.id
+    # }
+    order_payload = order_prod_factory()
     order = {
-        "positions": [
-            {"quantity": 3},
-        ]
+        "status": "Done"
     }
-    url = reverse('orders-detail', args=(order_payload['id'],))
-    resp = api_admin.patch(url, order, format='json')
+    url = reverse('orders-detail', args=(order_payload.id, ))
+    resp = api_admin.patch(url, order)
     assert resp.status_code == HTTP_200_OK
+
+

@@ -27,7 +27,7 @@ class OrdersViewSet(ModelViewSet):
     permission_classes_by_action = {'list': [IsAuthenticated],
                                     'retrieve': [isAllowed],
                                     'create': [IsAuthenticated],
-                                    'destroy': [isAllowed],
+                                    'destroy': [IsAdminUser],
                                     'update': [IsAdminUser],
                                     'partial_update': [IsAdminUser]
                                     }
