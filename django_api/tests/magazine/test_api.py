@@ -4,9 +4,11 @@ from django.urls import reverse
 from rest_framework.status import HTTP_200_OK, HTTP_401_UNAUTHORIZED, \
     HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 
-from magazine.models import Product, ProductReviews, Orders, Collections
+from magazine.models import Product
+
 
 # ____________Tests for products____________
+
 # тест на получение всех товаров
 @pytest.mark.django_db
 def test_product_list(api_client):
@@ -237,7 +239,9 @@ def test_review_double_post(apiuser, user, review_factory, product_factory):
     resp_2 = apiuser.post(url, new_review)
     assert resp_2.status_code == HTTP_400_BAD_REQUEST
 
+
 # ____________Tests for orders____________
+
 # тест на получение списка заказов без авторизации
 @pytest.mark.django_db
 def test_order_list_no_auth(api_client):
@@ -287,10 +291,54 @@ def test_order_create_no_auth(api_client, product_factory):
     assert resp.status_code == HTTP_401_UNAUTHORIZED
 
 
+# тест на изменение заказа админом
+@pytest.mark.django_db
+def test_order_update_admin(api_admin, order_prod_factory):
+
+    order = order_prod_factory()
+    first_position = order.positions.first()
+    product_id = first_position.product.id
+    quantity = first_position.quantity
+    new_quantity = quantity + 1
+    order_update_payload = {
+        'status': 'Done',
+        'positions': [
+            {
+                'product_id': product_id,
+                'quantity': new_quantity,
+            }
+        ]
+    }
+
+    url = reverse('orders-detail', args=(order.id, ))
+    resp = api_admin.patch(url, order_update_payload, format='json')
+    assert resp.status_code == HTTP_200_OK
+    resp_json = resp.json()
+    assert resp_json['status'] == order_update_payload['status']
 
 
+# тест на изменение заказа юзером
+@pytest.mark.django_db
+def test_order_update_admin(api_user, order_prod_factory):
 
-# тест на изменение заказа юзером!!!!!!!!!!!!!!!!!!!!!!!!!
+    order = order_prod_factory()
+    first_position = order.positions.first()
+    product_id = first_position.product.id
+    quantity = first_position.quantity
+    new_quantity = quantity + 1
+    order_update_payload = {
+        'status': 'Done',
+        'positions': [
+            {
+                'product_id': product_id,
+                'quantity': new_quantity,
+            }
+        ]
+    }
+
+    url = reverse('orders-detail', args=(order.id, ))
+    resp = api_user.patch(url, order_update_payload, format='json')
+    assert resp.status_code == HTTP_403_FORBIDDEN
 
 
 # тест на удаление заказа админом
@@ -402,31 +450,3 @@ def test_collections_delete_user(api_user, collection_factory):
     url = reverse('collections-detail', args=(collection.id,))
     resp = api_user.delete(url, {"id": collection.id})
     assert resp.status_code == HTTP_403_FORBIDDEN
-
-
-
-
-
-
-###################################################################
-
-
-
-    
-# тест на изменение заказа админом!!!!!!!!!!!!!!!!!!!!!!!!
-@pytest.mark.django_db
-def test_order_update_admin(api_admin, order_factory, product_factory, order_prod_factory):
-    # product = product_factory()
-    # position = {
-    #     "products": product.id
-    # }
-    order = order_prod_factory()
-    first_position = order.positions.first()
-    product_id = first_position.product.id
-    order_update_payload = {
-        'status': 'Done'
-    }
-
-    url = reverse('orders-detail', args=(order.id, ))
-    resp = api_admin.patch(url, order_update_payload, format='json')
-    assert resp.status_code == HTTP_200_OK

@@ -46,7 +46,7 @@ def user(django_user_model):
 @pytest.fixture
 def apiuser(django_user_model, user):
     client = APIClient()
-    usertoken = Token.objects.create(user=user)
+    user_token = Token.objects.create(user=user)
     client.force_login(user)
-    client.credentials(HTTP_AUTHORIZATION=f'Token {usertoken.key}')
+    client.credentials(HTTP_AUTHORIZATION=f'Token {user_token.key}')
     return client

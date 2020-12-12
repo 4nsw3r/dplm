@@ -19,7 +19,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
     positions = ProductOrderPositionSerializer(many=True)
     creator = serializers.CharField(source='creator.username', read_only=True)
-
+    # pos_ids = serializers.PrimaryKeyRelatedField(many=True, read_only=False,
+    #                                              queryset=Product.objects.all(), source='products')
 
     class Meta:
         model = Orders
@@ -49,6 +50,21 @@ class OrderSerializer(serializers.ModelSerializer):
             )
 
         return order
+
+    def update(self, instance, validated_data):
+        products = validated_data.pop('positions')
+        for prod_data in validated_data:
+            if Orders._meta.get_field(prod_data):
+                setattr(instance, prod_data, validated_data[prod_data])
+        ProductOrderPosition.objects.filter(order=instance).delete()
+        for prod in products:
+            position = dict(prod)
+            ProductOrderPosition.objects.create(order=instance,
+                                                product=position['product']['id'],
+                                                quantity=prod['quantity'])
+        instance.save()
+        return instance
+
 
 
 class ProductSerializer(serializers.ModelSerializer):
