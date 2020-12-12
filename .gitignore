@@ -13,3 +13,4 @@ settings_local.py
 
 ### OS specific ###
 .DS_Store
+.htmlcov/

@@ -315,11 +315,12 @@ def test_order_update_admin(api_admin, order_prod_factory):
     assert resp.status_code == HTTP_200_OK
     resp_json = resp.json()
     assert resp_json['status'] == order_update_payload['status']
+    assert resp_json['positions'][0]['quantity'] == new_quantity
 
 
 # тест на изменение заказа юзером
 @pytest.mark.django_db
-def test_order_update_admin(api_user, order_prod_factory):
+def test_order_update_user(api_user, order_prod_factory):
 
     order = order_prod_factory()
     first_position = order.positions.first()
