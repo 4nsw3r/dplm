@@ -22,3 +22,16 @@ python manage.py loaddata fixtures.json
 ```bash
 python manage.py runserver
 ```
+
+
+#Описание приложения
+
+В адресной строке:
+- /admin - вход в админку
+- /auth/login -api авторизация
+- /api/v1/ - api 
+
+- /api/v1/products - получение всех товаров (для определенного ID: /api/v1/products/id/)
+- /api/v1/orders - получение всех заказов 
+- /api/v1/collections - получение всех подборок
+- /api/v1/rewiws - получение всех отзывов
