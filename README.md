@@ -34,4 +34,4 @@ python manage.py runserver
 - /api/v1/products - получение всех товаров (для определенного ID: /api/v1/products/id/)
 - /api/v1/orders - получение всех заказов 
 - /api/v1/collections - получение всех подборок
-- /api/v1/rewiws - получение всех отзывов
+- /api/v1/rewiews - получение всех отзывов
